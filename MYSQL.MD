@@ -51,17 +51,57 @@ SELECT * from information_schema.table_constraints WHERE TABLE_NAME='user';
 
 推荐
 on update cascade on delete restrict
-### 5. sql错误处理
+### 5. 定义条件与处理程序
+1. 定义条件
+declare 错误 condition for 错误码/错误条件
+2. 处理程序
+
 1062: mysql_error_code
 ```sql
-declare exit/continue handler for 1062 set @sv=-1;
+declare exit/continue/undo handler for 1062 set @sv=-1;
 ```
-### 6. 
+### 6. 流程控制
+循环结构：loop ， while...do
 repeat ... until... 相当于 do while循环
 ### 7. MySQL 8
-check约束
-DDL原子化
-计算列 int generated always as(a+b) virtual
+1. check约束
+
+2. DDL原子化
+
+3. 计算列 int generated always as(a+b) virtual
 重启后自增不重置，写在redo_log. mysql 5.7重启后，自增会重置，保存在内存。 （删除后重启，8显示为主键不连续）
 
+4. 全局变量持久化persist
+
+5. 内部临时表的默认存储引擎由memory改为tempTable
+
+6. 窗口函数
+作用类似于分组函数。不合并结果，数据多少条就有多少结果
+
+select 窗口函数 over 条件(相当于where后条件)
+
+7. 公用表表达式CTE(common table compressions)
+可以多次调用.子查询不能多次调用
+- 普通：  with 名称 as 表达式
+- 递归：  with recursive  名称 as 表达式
+### 8. 存储过程与存储函数
+存储过程 procedure， 调用call
+存储函数 function ， 调用select 
+### 9. 游标cursor
+cursor for 
+open
+fetch
+close
+### 10. 触发器trigger
+条件insert/update时可以使用new，delete可以使用old表示表中已经存在的记录
+```
+create trigger ... 
+before/after insert/update/delete on 表
+for each row
+条件
+```
+自定义错误
+```
+then signal sqlstate 'HY000' set message_text="高于a"
+```
 
