@@ -1,0 +1,21 @@
+{
+  "data": {
+    "filterMod": {
+      "filters": [
+        {
+          "showText": "价格区间(元)",
+          "traceName": "price",
+          "subType": "price",
+          "unfoldRow": "2"
+        }
+      ]
+    },
+    "itemsArray": [
+      {
+        "title": "女孩包包网红儿童斜挎包可爱蝴蝶结女童单肩包洋气公主宝宝零钱包"
+      }
+    ]
+  },
+  "traceId": "21507c9317084355256255500eec05",
+  "v": "2.0"
+}
