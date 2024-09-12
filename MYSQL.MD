@@ -57,6 +57,8 @@ where cid=1 and comments>1 order by views desc limit 1;
 alter table a add index idx_cv(cid,views)
 ```
 ### 2.关联查询优化
+内连接时,如果连接条件只有一个字段有索引,则有索引字段所在的表会被作为被驱动表
+
 内连接时,MySQL会自动把小结果集的表选为驱动表,所以大表的字段最好加上索引.
 左连接时,左表会全表扫描,所以右边大表字段最好加上索引.右连接同理
 
@@ -396,3 +398,6 @@ BEGIN
 END //
 DELIMITER ;
 CALL idata();
+```
+## 32. mysql优化
+
