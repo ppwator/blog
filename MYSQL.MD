@@ -63,6 +63,19 @@ alter table a add index idx_cv(cid,views)
 左连接时,左表会全表扫描,所以右边大表字段最好加上索引.右连接同理
 
 straight_join 强制内连接 连接方式为左表join右表
+join慢,可以改大join_buffer_size默认256k
+explain结果extra字段有Block nested loop(mysql 5.7使用. mysql 8.0为hash join)时,尽量不要用join
+```sql
+ select t1.b,t2.* from t1 straight_join t2 on (t1.b=t2.b) where t2.id<=100;
+ -- t1,t2数据相同时,t1表做驱动表更好(看查询条件.只有1个字段t1.b需要放join_buffer) 
+```
+1. 保证被驱动表的join字段创建索引. (过滤后条件区分是否小表)
+2. 需要join的字段,数据类型保持绝对一致
+3. left join时,选择小表驱动大表. 减少外层循环的次数
+4. inner join时,mysql会自动将小结果集的表选为驱动表.选择相信mysql优化策略
+5. 能够直接多表关联的尽量直接关联,不用子查询.减少查询趟数
+6. 不建议使用子查询,建议将子查询sql拆开,结合程序多次查询,或使用join代替子查询
+7. 衍生表建不了索引. (create table ... as)
 ### 3.不适合创建索引
 1. where,group by,order by使用不到的
 2. 数据量小的表
@@ -71,7 +84,37 @@ straight_join 强制内连接 连接方式为左表join右表
 5. 不建议用无序的值作为索引
 6. 删除不再使用或很少使用的索引
 7. 不要定义冗余或重复的索引
+### 4. 子查询优化
+建议使用join代替. 子查询需要建立临时表,临时表不能建立索引
+### 5. 排序优化
+可以在where子句和order by子句中使用索引,目的是在where子句中避免全表扫描,order by子句避免使用filesort排序.(过滤后数量不多时,filesort性能可能更好,不一定必须优化)
 
+尽量不要使用not in 或not exists,用left join xxx on xxx where xx is null代替 
+
+where 和 order by子句 前后顺序可以反转,可以使用索引
+
+对于排序,多个相等条件也是范围查询,不能使用索引.
+
+当范围条件和[group by或order by]的字段出现二选一时,优先观察条件字段的过滤数量.如果过滤的数据足够多,而需要排序的数据并不多时,优先把索引放在范围字段上.反之亦然
+> fileSort算法: 
+- 4.1前使用双路排序. 
+- 4.1后使用单路排序. 内存占用大,性能好
+> 可以调整:
+>
+> 1.sort_buffer_size,默认1M. 超出会创建tmp文件
+>
+> 2.max_length_for_sort_data. 大于时使用双路
+
+order by时select *是大忌,最好只query需要的字段.
+### 6. 分组优化
+- where效率高于having, 能写在where就不要写在having
+- 减少使用order by, 或将排序放到程序端
+- 包含order by,group by,distinct查询的语句,where结果集保持在1000行以内
+### 7. 分页查询
+尽量朝主键索引靠
+```sql
+ select * from t,(select id from t order by id limit 200000,10) a where t.id = a.id;
+```
 ## 3. 查看约束constraint
 SELECT * from information_schema.table_constraints WHERE TABLE_NAME='user';
 ## 4. 外键约束

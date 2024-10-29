@@ -17,7 +17,7 @@ future|未来|futures|期货
 sand|沙子|sands|沙漠
 water|水|waters|水域
 
-How about a film?
+How about a film? 看电影怎么样?
 ## 1. 句型
 1. (It's) time for... 是时候...
 2. How's your...? 你的...怎么样? 
