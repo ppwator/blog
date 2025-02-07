@@ -35,6 +35,15 @@ GPT Prompt:6要素.任务task、上下文context、示例exemplar、角色person
  - [樱桃茶](https://new.cherrychat.org/home)
  - [AI导航](https://ai.itzb.net/)
  - [设计开发导航](https://toolhunt.vercel.app/home#)
+
+ ### 4. 视频生成
+ - CogVideoX
+
+- Mochi 1
+
+- LTX Video
+
+- Pyramid Flow
  ## 二 其它
   1. 卷积神经网络CNN
 属于图像识别算法

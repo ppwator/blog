@@ -111,6 +111,25 @@
 111. Any updates? 有什么新消息吗?
 112. count on me. 放心交给我
 113. I mean it. 我是认真的
+114. keep your shirt on.保持冷静
+115. cross my heart. 我发誓
+116. the more the merrier. 人多才热闹
+117. what are the odds. 太巧了
+118. thanks,but no,thanks. 
+119. six of one. 半斤八两
+120. give it to me straight. 你就直说吧
+121. right as rain. 一切正常
+122. Having second thoughts? 后悔了吗?
+123. Do I look like I care? 你觉得我在乎吗?
+124. I call the shots. 我说了算
+125. suit yourself. 随你便吧
+126. poppycock. 胡说八道
+127. Don't beat yourself up. 别太自责
+128. Where to? 你要去哪?
+129. I'm for it. 我赞成
+130. I give in. 我屈服
+131. Heads up! 小心,危险
+132. Are there sharks/dolphins here? 这里有鲨鱼/海豚吗?
 
 
 ## 一 印欧语音变规律
