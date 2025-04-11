@@ -3,6 +3,8 @@
 
 2. [ai-apps](https://www.ai-apps.com.cn/)
 
+3. [ai站点/工具](https://www.toolify.ai/)
+
 GPT Prompt:6要素.任务task、上下文context、示例exemplar、角色persona、格式format和语气tone
 ![prompt](./img/prompt.webp)
 

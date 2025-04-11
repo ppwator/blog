@@ -80,10 +80,26 @@ explain结果extra字段有Block nested loop(mysql 5.7使用. mysql 8.0为hash j
 1. where,group by,order by使用不到的
 2. 数据量小的表
 3. 大量重复数据的列.重复度高于10%.
-4. 避免对经常更新的表创建过多索引
+4. 避免对经常更新的表/字段创建过多索引
 5. 不建议用无序的值作为索引
 6. 删除不再使用或很少使用的索引
 7. 不要定义冗余或重复的索引
+#### 3.1 适合创建索引
+1. 字段数值有唯一性限制
+2. 频繁作为where查询条件的字段
+3. 经常group by 和 order by的列. 联合索引更好
+4. update,delete的where条件列
+5. distinct 字段
+6. 多表join时. 连接字段,where条件 创建索引
+7. 使用列的类型小的创建索引
+8. 使用字符串前缀创建索引. count(distinct left(列名,索引长度)/count(*)) from 表名. 一般长度20区分度可以达到90%.
+索引前缀无法支持使用索引排序
+9. 区分度高的列 
+select count(distinct 列名)/count(*) from 表名 计算区分度. 基数越大越好. 一般超过33% 就是比较高效. 
+10. 使用最频繁的列 放到联合索引左侧
+11. 多个字段都需要创建索引时,联合索引优于 单值索引
+
+一般单表不超过6个索引
 ### 4. 子查询优化
 建议使用join代替. 子查询需要建立临时表,临时表不能建立索引
 ### 5. 排序优化
@@ -308,6 +324,10 @@ match(title,content) against('查询字符串')。比like快，可能存在精�
 ### 1. 页的上层结构
 存储结构从大到小:表空间(Tablespace)-->段(segment)-->区(extent)-->页(page)
 
+常见的段有 数据段(叶子节点),索引段,回滚段. 段由若干零散的页面以及一些完整的区组成
+
+碎片区(fragment)直属于表空间
+
 顺序io
 区(Extent)是比页大一级的存储结构,一个区会分配64个连续页.一个区的大小是64*16kB=1MB
 区分为:free,free_frag(有剩余空间的碎片区),full_frag(没有剩余空间的碎片区)(以上3种直属于表空间),fseg(附属于某个段的区)
@@ -375,7 +395,7 @@ mysqldumpslow -s t -t 5 .log
 # 重新生成日志文件
 mysqladmin -uroot -p flush-logs slow
 ```
-### 1. show profile
+### 1. show profiles/show prifile
 ![注意点](./img/show%20profile.jpg)
 
 ### 2. explain
@@ -384,7 +404,7 @@ or 的字段都有索引，会使用 index_merge
 > 主键或唯一索引与常数等值匹配时,const
 > 普通索引等值匹配，ref。 隐式转换会变成all
 > 从好到坏：`system>const >eq_ref>ref` > `fulltext>ref_or_null>index_merge>unique_subquery>index_subery` > range>index>all
-2. key_len: 查看联合索引使用。
+2. key_len: 查看联合索引使用。自身越大越好
 null 占1B，varchar需要+3B（变长2B,null占1B）
 3. rows: 预估读取记录数。越小越好
 4. extra:
@@ -396,7 +416,7 @@ json格式，信息更丰富. explain format=json
 tree格式，
 可视化输出:MySQL workbench
 
-### 3. show warnings: 查看优化后的sql语句
+### 3. show warnings: 查看优化后的sql语句. 先explain
 ### 4. 分析优化器执行计划: Optimizer Trace
 MySQL5.6引入.默认关闭. 
 结果保存在INFORMATION_SCHEMA.OPTIMIZER_TRACE表
