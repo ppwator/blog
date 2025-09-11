@@ -15,6 +15,8 @@ _bin | binary | 以二进制方式比较
 3）当子查询结果集很大，而外部表较小的时候，Exists的Block Nested Loop(Block 嵌套循环)的作用开始显现，并弥补外部表无法用到索引的缺陷，查询效率会优于IN。
 4）当子查询结果集较小，而外部表很大的时候，Exists的Block嵌套循环优化效果不明显，IN 的外表索引优势占主要作用，此时IN的查询效率会优于Exists。
 5）表的规模不是看内部表和外部表，而是外部表和子查询结果集
+
+尽量不要使用not in或not exists,用left join xxx on xx where xx is null 替代
 ## 1. explain
 ### 1. type: 
 system:表只有一行记录
@@ -443,9 +445,15 @@ MySQL保证的一致性是：在一个事务中的DML（增删改）操作
 不一致场景与mysql解决方案:
 1. 并发冲突. 加锁
 2. redolog不完整.
-InnoDB是通过「双写缓冲」、「Redo Log」等机制保证数据不丢失的. 事务执行中宕机,通过undolog解决
-3. binlog&redolog不一致
+InnoDB是通过「双写缓冲」、「Redo Log（物理磁盘）」等机制保证数据不丢失的. 事务执行中宕机,通过undolog解决
 
+undolog保证原子性。事务更新前先写undolog.
+3. binlog（主从复制）&redolog不一致
+事务执行过程中,redo log(保证持久性)不断记录.事务提交后,一次写入binlog
+
+4. undolog （逻辑）作用：
+- 回滚数据
+- MVCC（readview）
 ## 31. 存储过程
 1. 插入数据
 ```sql
@@ -463,4 +471,136 @@ DELIMITER ;
 CALL idata();
 ```
 ## 32. mysql优化
+where 使用索引避免全表扫描, order by避免使用FileSort排序
+FileSort有时更快,查出的rows不多时 
+FileSort 排序: 双路排序(慢,4.1前),单路排序(快.需要多占用空间.提高sort_buffer_size(默认1M),max_length_for_sort_data(1024B.大于使用双路)).
+
+1. limit优化:
+```
+SELECT * 
+FROM student t, 
+     (SELECT id FROM student ORDER BY id LIMIT 2000000, 10) a 
+WHERE t.id = a.id;
+```
+或
+```
+-- 先查出当前页的起始 id
+SELECT id FROM student ORDER BY id LIMIT 2000000, 10;
+
+-- 再查完整记录
+SELECT * FROM student WHERE id IN (...上述id们...);
+```
+
+2. 前缀索引
+使用前缀索引用不上覆盖索引对查询性能的优化
+- 倒序存储. reverse函数查询. 身份证号
+- 使用hash字段. crc32()函数. 查询时使用 crc32 和 card 字段
+
+3. ![ICP](./img/ICP的使用条件.png). 需要回表时使用
+
+4. change buffer.
+
+- 更新唯一索引 不能使用change buffer.
+- 写多读少的时候,普通索引change buffer比 唯一索引更好.账单,日志
+- 如果所有更新后面,都马上伴随着对这个纪录的查询,应该关闭change buffer. 其它情况下,都能提升更新性能
+
+5. count
+count(具体字段),尽量采用2级索引
+
+6. select(*)
+- 需要查询数据字典获取字段,增加耗时
+- 无法使用 覆盖索引
+
+7. limit 1
+唯一索引时,不需要
+扫描全表的,加上 查到不会继续扫描,可以加速
+
+8. 多使用commit
+![commit](./img/commit.png)
+
+9. 主键
+![uuid](./img/uuid.png)
+mysql 8.0 提供的uuid_to_bin 实现了单调递增(时间),降低存储空间(36->16 B)
+``` sql
+SET @uuid=UUID();
+-- true实现 时间反转,单调递增
+select @uuid,uuid_to_bin(@uuid,true);
+```
+
+10. 范式(nomal form. NF)
+- 1st NF: 原子性(主观)
+- 2nd NF: 非主键必须完全依赖全部主键. 1张表是1个独立的对象,只表达1个意思
+- 3rd NF: 非主键必须与主键直接相关, 不能依赖其它非主键.非主键之间必须相互独立
+- BCNF: 巴斯范式. 达到第三范式,并且只有1个候选键,或者每个候选键都是单属性. 消除了主属性对候选键的部分依赖或传递依赖.
+
+11. 其它优化策略
+analyze table, check table
+optimize table(varchar,varbinary,blob,text)
+mysqlcheck -o (类似optimize)
+**反范式设计:** 
+- 不需要经常修改,查询不可或缺
+场景: 历史快照,数仓(历史数据,分析)
+
+## 33.ER(entity-relationship)模型
+## 34. 事务
+开启事务begin 或 start transaction
+
+start transaction 后面可以跟 read only /read write(默认) / with consistent snapshot
+
+![completion_type](./img/completion_type.png)
+
+## 35.锁
+### 1. 对数据的操作类型划分：
+- 读锁/共享锁（shared lock）。 S锁
+- 写锁/排他锁（exclusive lock）。 X锁
+
+### 2. 意向锁（intention lock）
+innoDB支持多粒度锁，允许行级锁 与表锁 共存，意向锁就是其中的一种表锁。
+
+1. 意向锁的存在是为了协调行锁和表锁的关系，支持多粒度的锁共存
+2. 意向锁是一种不与行锁冲突的表锁
+3. 表明 某个事务正在某些行持有了锁或该事务准备去持有锁
+
+意向锁是存储引擎自己维护的，用户无法操作。添加x行锁，自动添加 IX 锁。
+
+### 3. 表锁之自增锁，元数据锁（MDL）
+都不需要显式添加
+对一个表做crud操作时，加MDL读锁；对表做结构变更操作时，加MDL写锁
+MDL读锁之间不互斥。
+
+### 4. 行锁
+也叫记录锁。行锁只在存储引擎层实现
+1. 记录锁
+2. 间隙锁。防止插入幻影记录。 不存在的记录加锁，锁定间隙
+3. 临键锁（next-key locks）
+mysql 默认使用。事务级别 可重复读，innodb
+合体
+4. 插入意向锁
+等待插入的gap锁。
+
+悲观锁。 数据库实现for update，确保查询字段添加索引
+
+乐观锁。 程序实现。读操作多。版本号，时间戳 或 CAS 机制。java的 concurrent.atomic 使用CAS
+
+乐观锁，主从时，需要强制读取 主表，否则 有主从同步问题
+同一条数据频繁修改时，查询条件增加 where num>0 的条件可以避免超卖 和 避免过多失败
+
+5. 全局锁 典型场景：全库逻辑备份
+
+- Flush tables with read lock
+6. 死锁
+
+## 36. MVCC
+
+MVCC的实现依赖于：隐藏字段（trx_id,roll_pointer），undo log(版本链)， Read View（快照读）。乐观锁
+
+Read View在 read committed 和 repeatable read 隔离级别下使用
+
+## 37. 日志文件
+```
+show binlog events in ''; // 库.表
+
+redolog 是物理日志，用于崩溃恢复，持久性
+
+relay log 中继日志，只在总从架构的从服务器存在
 

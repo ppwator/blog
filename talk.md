@@ -121,3 +121,5 @@ redecorate a room in your house. 重新装饰你的房间
 
 sign-up for volunteer work. 报名参加志愿工作
 
+what's she like？ 她性格怎样？
+

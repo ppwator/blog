@@ -92,6 +92,11 @@ Transformer:最初解决机器翻译问题. 用attention代替RNN. 现在更多 
 
 Transfer Learning(迁移学习),Self-supervised Learning(自监督学习) and Pre-training
 
+激活函数:
+![激活函数](./img/激活函数.png)
+
+最小化损失函数:梯度下降法
+
 前向传播:将训练样本输入网络架构以误差值(损失函数)获得对应输出
 反向传播:将输出与标准答案计算以更新权重并反复执行直到误差低于设定值
 ### 4.1 基本神经网络模型

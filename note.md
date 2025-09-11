@@ -1,6 +1,14 @@
 
 - [酷工作](https://cooljobs.com/)
+- [edx](https://www.edx.org/)
+- [HackerRank](https://www.hackerrank.com/)
+- [CSES](https://cses.fi/problemset/)
+- [创建Discord](https://www.howtogeek.com/364075/how-to-create-set-up-and-manage-your-discord-server/)
+- [reddit](https://www.reddit.com/r/learnprogramming/)
+## blog
 - [学习系统设计和软件架构的 40 篇必读工程博客](https://medium.com/javarevisited/40-must-read-engineering-blogs-to-learn-system-design-and-software-architecture-in-2024-aaa7c4f71ee6)
+
+- [70+ Engineering Blogs To Follow in 2025](https://newsletter.techworld-with-milan.com/p/70-engineering-blogs-to-follow-in?ref=dailydev)
 ## 技术会议
 
 - [Google I/O](https://events.google.com/io/)
