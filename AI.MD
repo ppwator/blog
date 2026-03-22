@@ -7,6 +7,7 @@
 
 GPT Prompt:6要素.任务task、上下文context、示例exemplar、角色persona、格式format和语气tone
 ![prompt](./img/prompt.webp)
+![LLM 技术栈](./img/LLM%20Tech%20Stack.webp)
 
 ### 3. [15+开发者AI工具](https://www.marktechpost.com/2024/05/03/15-ai-tools-for-developers-2024/)
  [AI code tools](https://www.builder.io/blog/best-ai-coding-tools?ref=dailydev)
@@ -80,7 +81,7 @@ Knowledge density:知识密度
 ## 3.4 训练方法
 ELMo:Contextualized Pre-training Start Here
 
-## 四 神经网络
+## 四、 神经网络
 
 RNN:Recurrent 循环(递归)神经网络.不具有记忆能力
 LSTM:长短期记忆网络
