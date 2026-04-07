@@ -49,7 +49,8 @@ GPT Prompt:6要素.任务task、上下文context、示例exemplar、角色person
 - Pyramid Flow
  ## 二 其它
   1. 卷积神经网络CNN
-属于图像识别算法
+  擅长提取局部和位置不变的模式
+最初图像识别算法。NLP
 卷积:数学方法提取出图像特征
 NPU:神经网络处理器
 卷积核   特征图:相乘再相加
@@ -115,3 +116,8 @@ Transfer Learning(迁移学习),Self-supervised Learning(自监督学习) and Pr
 线性整流函数,是一个取最大值函数.输入<0时,输出为0. 输入>0时,输出等于输入
 - 优点: 收敛速度远快于Sigmoid 和 Tanh. 输入正数时,解决梯度消失问题
 - 缺点: 函数输出非Zero-centered
+
+## 五 主要流派
+- 符号主义
+- 连接主义
+- 行为主义
