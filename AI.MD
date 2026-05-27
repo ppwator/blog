@@ -121,3 +121,6 @@ Transfer Learning(迁移学习),Self-supervised Learning(自监督学习) and Pr
 - 符号主义
 - 连接主义
 - 行为主义
+
+## 六 搜索算法
+局部搜索算法：爬山法，模拟退火法，遗传法
