@@ -1,0 +1,1 @@
+1. python版本管理 anaconda，项目包管理 uv
